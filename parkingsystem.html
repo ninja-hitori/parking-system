@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Parking Lot Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: #222;
+      color: white;
+      padding: 15px;
+    }
+    .container {
+      padding: 20px;
+    }
+    .lot {
+      display: grid;
+      grid-template-columns: repeat(5, 100px);
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .slot {
+      height: 60px;
+      border: 2px solid #333;
+      background: #8bc34a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .slot.occupied {
+      background: #f44336;
+      cursor: not-allowed;
+    }
+    .info {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Parking Lot Simulator</h1>
+    <p>Click on a slot to park or remove a car</p>
+  </header>
+
+  <div class="container">
+    <div class="lot" id="parkingLot"></div>
+    <div class="info" id="info"></div>
+    <button onclick="resetLot()">Reset Parking Lot</button>
+  </div>
+
+  <script>
+    const totalSlots = 15;
+    let occupied = 0;
+    const lot = document.getElementById("parkingLot");
+    const info = document.getElementById("info");
+
+    function createLot() {
+      lot.innerHTML = "";
+      occupied = 0;
+      updateInfo();
+
+      for (let i = 1; i <= totalSlots; i++) {
+        const slot = document.createElement("div");
+        slot.classList.add("slot");
+        slot.textContent = "S" + i;
+
+        slot.addEventListener("click", () => toggleSlot(slot));
+        lot.appendChild(slot);
+      }
+    }
+
+    function toggleSlot(slot) {
+      if (slot.classList.contains("occupied")) {
+        slot.classList.remove("occupied");
+        occupied--;
+      } else {
+        slot.classList.add("occupied");
+        occupied++;
+      }
+      updateInfo();
+    }
+
+    function updateInfo() {
+      info.textContent = `Occupied: ${occupied} / ${totalSlots} | Free: ${totalSlots - occupied}`;
+    }
+
+    function resetLot() {
+      createLot();
+    }
+
+    createLot();
+  </script>
+</body>
+</html>
