@@ -1,110 +1,485 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Parking Lot Simulator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header {
-      background: #222;
-      color: white;
-      padding: 15px;
-    }
-    .container {
-      padding: 20px;
-    }
-    .lot {
-      display: grid;
-      grid-template-columns: repeat(5, 100px);
-      gap: 15px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .slot {
-      height: 60px;
-      border: 2px solid #333;
-      background: #8bc34a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .slot.occupied {
-      background: #f44336;
-      cursor: not-allowed;
-    }
-    .info {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking Lot Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid #333;
+        }
+
+        .parking-blocks {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .block {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+        }
+
+        .block-title {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .block-stats {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+        }
+
+        .slot {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            border: 3px solid #333;
+            position: relative;
+        }
+
+        .slot:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .slot.available {
+            background: #4ade80;
+            color: white;
+        }
+
+        .slot.occupied {
+            background: #ef4444;
+            color: white;
+        }
+
+        .slot.ev {
+            background: #fbbf24;
+            color: #333;
+        }
+
+        .slot.ev.occupied {
+            background: #f59e0b;
+        }
+
+        .slot.two-wheeler {
+            background: #06b6d4;
+            color: white;
+        }
+
+        .slot.two-wheeler.occupied {
+            background: #164e63;
+        }
+
+        .slot .ev-icon {
+            font-size: 1.2em;
+        }
+
+        .electrical { border-color: #3b82f6; }
+        .mechanical { border-color: #8b5cf6; }
+        .cs { border-color: #10b981; }
+        .hostel { border-color: #f59e0b; }
+        .coffee { border-color: #ec4899; }
+
+        .electrical .block-header { border-color: #3b82f6; color: #3b82f6; }
+        .mechanical .block-header { border-color: #8b5cf6; color: #8b5cf6; }
+        .cs .block-header { border-color: #10b981; color: #10b981; }
+        .hostel .block-header { border-color: #f59e0b; color: #f59e0b; }
+        .coffee .block-header { border-color: #ec4899; color: #ec4899; }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-reset {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-random {
+            background: #3b82f6;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .subtitle { font-size: 1em; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .parking-blocks { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Parking Lot Simulator</h1>
-    <p>Click on a slot to park or remove a car</p>
-  </header>
+    <div class="container">
+        <header>
+            <h1>Smart Campus Parking System</h1>
+            <p class="subtitle">Real-Time Parking Availability Monitor</p>
+        </header>
 
-  <div class="container">
-    <div class="lot" id="parkingLot"></div>
-    <div class="info" id="info"></div>
-    <button onclick="resetLot()">Reset Parking Lot</button>
-  </div>
+        <div class="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Slots</h3>
+                    <div class="number" id="total-slots">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Available</h3>
+                    <div class="number" style="color: #4ade80;" id="available-slots">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Occupied</h3>
+                    <div class="number" style="color: #ef4444;" id="occupied-slots">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>EV Charging</h3>
+                    <div class="number" style="color: #fbbf24;" id="ev-slots">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Two Wheelers</h3>
+                    <div class="number" style="color: #06b6d4;" id="two-wheeler-slots">0</div>
+                </div>
+            </div>
 
-  <script>
-    const totalSlots = 15;
-    let occupied = 0;
-    const lot = document.getElementById("parkingLot");
-    const info = document.getElementById("info");
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #4ade80;"></div>
+                    <span>Available</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #ef4444;"></div>
+                    <span>Occupied</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #fbbf24;"></div>
+                    <span>EV Available</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #f59e0b;"></div>
+                    <span>EV Occupied</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #06b6d4;"></div>
+                    <span>Two Wheeler Available</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #164e63;"></div>
+                    <span>Two Wheeler Occupied</span>
+                </div>
+            </div>
 
-    function createLot() {
-      lot.innerHTML = "";
-      occupied = 0;
-      updateInfo();
+            <div class="controls">
+                <button class="btn btn-reset" onclick="resetParking()">Reset All</button>
+            </div>
+        </div>
 
-      for (let i = 1; i <= totalSlots; i++) {
-        const slot = document.createElement("div");
-        slot.classList.add("slot");
-        slot.textContent = "S" + i;
+        <div class="parking-blocks" id="parking-blocks"></div>
+    </div>
 
-        slot.addEventListener("click", () => toggleSlot(slot));
-        lot.appendChild(slot);
-      }
-    }
+    <script>
+        const parkingConfig = {
+            electrical: { name: 'Electrical Block', slots: 20, evSlots: 3, twoWheelerSlots: 30, class: 'electrical' },
+            mechanical: { name: 'Mechanical Block', slots: 18, evSlots: 2, twoWheelerSlots: 25, class: 'mechanical' },
+            cs: { name: 'Computer Science Block', slots: 25, evSlots: 4, twoWheelerSlots: 35, class: 'cs' },
+            hostel: { name: 'Hostel ', slots: 20, evSlots: 3, twoWheelerSlots: 40, class: 'hostel' },
+            coffee: { name: 'Coffee Shop', slots: 25, evSlots: 4, twoWheelerSlots: 30, class: 'coffee' }
+        };
 
-    function toggleSlot(slot) {
-      if (slot.classList.contains("occupied")) {
-        slot.classList.remove("occupied");
-        occupied--;
-      } else {
-        slot.classList.add("occupied");
-        occupied++;
-      }
-      updateInfo();
-    }
+        let parkingState = {};
 
-    function updateInfo() {
-      info.textContent = `Occupied: ${occupied} / ${totalSlots} | Free: ${totalSlots - occupied}`;
-    }
+        function initializeParkingLot() {
+            const container = document.getElementById('parking-blocks');
+            container.innerHTML = '';
 
-    function resetLot() {
-      createLot();
-    }
+            Object.keys(parkingConfig).forEach(blockId => {
+                const config = parkingConfig[blockId];
+                parkingState[blockId] = [];
 
-    createLot();
-  </script>
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `block ${config.class}`;
+                blockDiv.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-title">${config.name}</div>
+                        <div class="block-stats">
+                            <span id="${blockId}-available">0</span>/<span>${config.slots}</span> Cars
+                        </div>
+                    </div>
+                    <div class="slots-grid" id="${blockId}-slots"></div>
+                    <div class="block-header" style="margin-top: 20px;">
+                        <div class="block-title" style="font-size: 1.1em;">Two Wheeler Section</div>
+                        <div class="block-stats">
+                            <span id="${blockId}-tw-available">0</span>/<span>${config.twoWheelerSlots}</span> Bikes
+                        </div>
+                    </div>
+                    <div class="slots-grid" id="${blockId}-tw-slots"></div>
+                `;
+                container.appendChild(blockDiv);
+
+                const slotsContainer = document.getElementById(`${blockId}-slots`);
+                
+                for (let i = 0; i < config.slots; i++) {
+                    const isEV = i < config.evSlots;
+                    const slot = {
+                        id: `${blockId}-${i}`,
+                        occupied: false,
+                        isEV: isEV,
+                        isTwoWheeler: false
+                    };
+                    parkingState[blockId].push(slot);
+
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = `slot ${config.class} available ${isEV ? 'ev' : ''}`;
+                    slotDiv.innerHTML = isEV ? `<span class="ev-icon">⚡</span><span>${i + 1}</span>` : `<span>${i + 1}</span>`;
+                    slotDiv.onclick = () => toggleSlot(blockId, i);
+                    slotsContainer.appendChild(slotDiv);
+                }
+
+                // Add two-wheeler slots
+                const twSlotsContainer = document.getElementById(`${blockId}-tw-slots`);
+                
+                for (let i = 0; i < config.twoWheelerSlots; i++) {
+                    const slotIndex = config.slots + i;
+                    const slot = {
+                        id: `${blockId}-tw-${i}`,
+                        occupied: false,
+                        isEV: false,
+                        isTwoWheeler: true
+                    };
+                    parkingState[blockId].push(slot);
+
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = `slot ${config.class} available two-wheeler`;
+                    slotDiv.innerHTML = `<span>🏍</span><span>${i + 1}</span>`;
+                    slotDiv.onclick = () => toggleSlot(blockId, slotIndex);
+                    twSlotsContainer.appendChild(slotDiv);
+                }
+            });
+
+            updateStatistics();
+        }
+
+        function toggleSlot(blockId, slotIndex) {
+            const config = parkingConfig[blockId];
+            const slot = parkingState[blockId][slotIndex];
+            slot.occupied = !slot.occupied;
+
+            let slotElement;
+            if (slot.isTwoWheeler) {
+                const twIndex = slotIndex - config.slots;
+                slotElement = document.getElementById(`${blockId}-tw-slots`).children[twIndex];
+            } else {
+                slotElement = document.getElementById(`${blockId}-slots`).children[slotIndex];
+            }
+            
+            slotElement.classList.toggle('occupied');
+            slotElement.classList.toggle('available');
+
+            updateStatistics();
+        }
+
+        function updateStatistics() {
+            let total = 0, available = 0, occupied = 0, evTotal = 0, twoWheelerTotal = 0;
+
+            Object.keys(parkingState).forEach(blockId => {
+                const carSlots = parkingState[blockId].filter(s => !s.isTwoWheeler);
+                const twoWheelerSlots = parkingState[blockId].filter(s => s.isTwoWheeler);
+                
+                const blockCarAvailable = carSlots.filter(s => !s.occupied).length;
+                const blockTWAvailable = twoWheelerSlots.filter(s => !s.occupied).length;
+                
+                document.getElementById(`${blockId}-available`).textContent = blockCarAvailable;
+                document.getElementById(`${blockId}-tw-available`).textContent = blockTWAvailable;
+
+                parkingState[blockId].forEach(slot => {
+                    total++;
+                    if (slot.occupied) occupied++;
+                    else available++;
+                    if (slot.isEV) evTotal++;
+                    if (slot.isTwoWheeler) twoWheelerTotal++;
+                });
+            });
+
+            document.getElementById('total-slots').textContent = total;
+            document.getElementById('available-slots').textContent = available;
+            document.getElementById('occupied-slots').textContent = occupied;
+            document.getElementById('ev-slots').textContent = evTotal;
+            document.getElementById('two-wheeler-slots').textContent = twoWheelerTotal;
+        }
+
+        function resetParking() {
+            Object.keys(parkingState).forEach(blockId => {
+                const config = parkingConfig[blockId];
+                parkingState[blockId].forEach((slot, i) => {
+                    slot.occupied = false;
+                    
+                    if (slot.isTwoWheeler) {
+                        const twIndex = i - config.slots;
+                        const slotElement = document.getElementById(`${blockId}-tw-slots`).children[twIndex];
+                        slotElement.classList.remove('occupied');
+                        slotElement.classList.add('available');
+                    } else {
+                        const slotElement = document.getElementById(`${blockId}-slots`).children[i];
+                        slotElement.classList.remove('occupied');
+                        slotElement.classList.add('available');
+                    }
+                });
+            });
+            updateStatistics();
+        }
+
+        function randomizeParking() {
+            Object.keys(parkingState).forEach(blockId => {
+                parkingState[blockId].forEach((slot, i) => {
+                    slot.occupied = Math.random() > 0.5;
+                    const slotElement = document.getElementById(`${blockId}-slots`).children[i];
+                    
+                    if (slot.occupied) {
+                        slotElement.classList.add('occupied');
+                        slotElement.classList.remove('available');
+                    } else {
+                        slotElement.classList.remove('occupied');
+                        slotElement.classList.add('available');
+                    }
+                });
+            });
+            updateStatistics();
+        }
+
+        initializeParkingLot();
+    </script>
 </body>
 </html>
